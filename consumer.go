@@ -22,7 +22,7 @@ type AmqpMessage struct {
 	Body string
 }
 
-func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string) chan AmqpMessage {
+func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueTimeout time.Duration) chan AmqpMessage {
 	output := make(chan AmqpMessage)
 
 	go func() {
@@ -48,13 +48,13 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 						pretty.Println("No more messages... closing channel to reconnect")
 						closed = true
 					}
-				case <-time.After(5 * time.Second):
+				case <-time.After(queueTimeout):
 					log.Println("Too much time without messages... closing channel to reconnect")
 					closed = true
 				}
 			}
 			log.Println("Waiting befor reconnect")
-			time.Sleep(5 * time.Second)
+			time.Sleep(TIME_TO_RECONNECT)
 		}
 	}()
 

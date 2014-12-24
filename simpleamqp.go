@@ -7,6 +7,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const (
+	TIME_TO_RECONNECT = 5 * time.Second
+)
+
 func setup(url string) (*amqp.Connection, *amqp.Channel) {
 	for {
 		conn, err := amqp.Dial(url)

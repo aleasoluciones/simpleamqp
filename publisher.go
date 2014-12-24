@@ -28,7 +28,8 @@ func NewAmqpPublisher(brokerUri string) *AmqpPublisher {
 		for {
 			err := publisher.publish_loop()
 			log.Println("ERROR", err)
-			time.Sleep(2 * time.Second)
+			log.Println("Waiting", TIME_TO_RECONNECT, "to reconnect")
+			time.Sleep(TIME_TO_RECONNECT)
 		}
 	}()
 	return &publisher
