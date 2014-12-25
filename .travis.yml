@@ -9,5 +9,5 @@ before_install:
 
 script:
   - go build
-  - go build examples/consumer.go
-  - go build examples/publisher.go
+  - go build examples/consumer/consumer.go
+  - go build examples/publisher/publisher.go

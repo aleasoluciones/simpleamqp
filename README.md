@@ -5,3 +5,4 @@
 SimpleAMQP is a minimal wrapper around the excelent AMQP library [github.com/streadway/amqp](http://github.com/streadway/amqp)
 It provided a AMQP Consumer and a AMQP Publisher
 
+
