@@ -12,16 +12,21 @@ type AmqpConsumer struct {
 	brokerUri string
 }
 
+// Return AMQP Consumer
 func NewAmqpConsumer(brokerUri string) *AmqpConsumer {
 	return &AmqpConsumer{
 		brokerUri: brokerUri,
 	}
 }
 
+// AmqpMessage struct
 type AmqpMessage struct {
 	Body string
 }
 
+// Return a AmqpMessage channel to receive messages using a given queue connected to the exchange with one ore more routing keys
+// Autoreconnect on error or when we have no message after queueTimeout expired
+// The function declare the queue
 func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueTimeout time.Duration) chan AmqpMessage {
 	output := make(chan AmqpMessage)
 
