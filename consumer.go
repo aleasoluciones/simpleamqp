@@ -3,9 +3,6 @@ package simpleamqp
 import (
 	"log"
 	"time"
-
-	"github.com/kr/pretty"
-	//"github.com/streadway/amqp"
 )
 
 type AmqpConsumer struct {
@@ -50,7 +47,7 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 					if more {
 						output <- AmqpMessage{Body: string(message.Body)}
 					} else {
-						pretty.Println("No more messages... closing channel to reconnect")
+						log.Println("No more messages... closing channel to reconnect")
 						closed = true
 					}
 				case <-time.After(queueTimeout):
