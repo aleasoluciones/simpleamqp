@@ -14,8 +14,8 @@ func main() {
 	flag.StringVar(&amqpuri, "amqpuri", "amqp://guest:guest@localhost/", "AMQP connection uri")
 	flag.Parse()
 
-	amqpClient := simpleamqp.NewAmqpConsumer(amqpuri)
-	messages := amqpClient.Receive("events", []string{"efa1", "efa2"}, "efa", 30*time.Second)
+	amqpConsumer := simpleamqp.NewAmqpConsumer(amqpuri)
+	messages := amqpConsumer.Receive("events", []string{"efa1", "efa2"}, "efa", 30*time.Second)
 	for message := range messages {
 		log.Println(message)
 	}
