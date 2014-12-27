@@ -24,15 +24,15 @@ func amqpUrlFromEnv() string {
 func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	t.Parallel()
 	amqpUrl := amqpUrlFromEnv()
+	amqpPublisher := NewAmqpPublisher(amqpUrl, "events")
 	amqpConsumer := NewAmqpConsumer(amqpUrl)
 	messages := amqpConsumer.Receive("events", []string{"routingkey1"}, "test_queue", 30*time.Second)
 	log.Println(amqpConsumer)
 
 	time.Sleep(2 * time.Second)
 
-	amqpPublisher := NewAmqpPublisher(amqpUrl)
-	amqpPublisher.Publish("events", "routingkey1", []byte("irrelevantBody1"))
-	amqpPublisher.Publish("events", "routingkey1", []byte("irrelevantBody2"))
+	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
+	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"))
 
 	message1 := <-messages
 	assert.Equal(t, message1.Body, "irrelevantBody1")

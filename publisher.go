@@ -8,26 +8,27 @@ import (
 )
 
 type messageToPublish struct {
-	exchange   string
 	routingKey string
 	message    []byte
 }
 
 type AmqpPublisher struct {
 	brokerUri      string
+	exchange       string
 	outputMessages chan messageToPublish
 }
 
-func NewAmqpPublisher(brokerUri string) *AmqpPublisher {
+func NewAmqpPublisher(brokerUri, exchange string) *AmqpPublisher {
 	publisher := AmqpPublisher{
 		brokerUri:      brokerUri,
+		exchange:       exchange,
 		outputMessages: make(chan messageToPublish, 1024),
 	}
 
 	go func() {
 		for {
 			err := publisher.publish_loop()
-			log.Println("ERROR", err)
+			log.Println("Error", err)
 			log.Println("Waiting", TIME_TO_RECONNECT, "to reconnect")
 			time.Sleep(TIME_TO_RECONNECT)
 		}
@@ -35,18 +36,18 @@ func NewAmqpPublisher(brokerUri string) *AmqpPublisher {
 	return &publisher
 }
 
-func (client *AmqpPublisher) Publish(exchange string, routingKey string, message []byte) {
-	messageToPublish := messageToPublish{exchange, routingKey, message}
+func (publisher *AmqpPublisher) Publish(routingKey string, message []byte) {
+	messageToPublish := messageToPublish{routingKey, message}
 	select {
-	case client.outputMessages <- messageToPublish:
+	case publisher.outputMessages <- messageToPublish:
 	case <-time.After(5 * time.Second):
 		log.Println("Publish channel full", messageToPublish)
 	}
 }
 
-func publish(channel *amqp.Channel, messageToPublish messageToPublish) error {
+func (publisher *AmqpPublisher) publish(channel *amqp.Channel, messageToPublish messageToPublish) error {
 	err := channel.Publish(
-		messageToPublish.exchange,
+		publisher.exchange,
 		messageToPublish.routingKey,
 		false,
 		false,
@@ -62,13 +63,20 @@ func publish(channel *amqp.Channel, messageToPublish messageToPublish) error {
 
 }
 
-func (client *AmqpPublisher) publish_loop() error {
-	conn, ch := setup(client.brokerUri)
+func (publisher *AmqpPublisher) publish_loop() error {
+	conn, ch := setup(publisher.brokerUri)
 	defer conn.Close()
 	defer ch.Close()
+
+	log.Println("Exchange declare", publisher.exchange)
+	err := ch.ExchangeDeclare(publisher.exchange, "topic", true, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
 	for {
-		messageToPublish := <-client.outputMessages
-		err := publish(ch, messageToPublish)
+		messageToPublish := <-publisher.outputMessages
+		err := publisher.publish(ch, messageToPublish)
 		if err != nil {
 			return err
 		}
