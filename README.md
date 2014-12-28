@@ -8,19 +8,19 @@ It provided a AMQP Consumer and a AMQP Publisher.
 ## Uses Cases
 ### Publish to a exchange
 Publish messages to a exchange without blocking the producing
-** Features **
+#### Features
  * Reconnect when a messege can't be delvered
  * Message buffer to avoid blocking the publisher
  * Discard messages when the message buffer is full due to a connection problem
 
-** Known Issues **
+#### Known Issues
  * When there is a connection problem, some messages can be lost
 
-** Unimplemente features **
+#### Unimplemente features
  * Exchange options not configurable
 
 ### Receive messages from a exchange
-** Features **
+#### Features
  * Receive using various routing keys
  * Reconnect in case of connection error
  * Reconnect when no messages received in a configurable amount of time (to detect some kind of connection problems at NATED networks where the NATED connection expires)
