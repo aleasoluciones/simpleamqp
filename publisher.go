@@ -68,12 +68,7 @@ func (publisher *AmqpPublisher) publish_loop() error {
 	defer conn.Close()
 	defer ch.Close()
 
-	log.Println("Exchange declare", publisher.exchange)
-	err := ch.ExchangeDeclare(publisher.exchange, "topic", true, false, false, false, nil)
-	if err != nil {
-		return err
-	}
-
+	exchangeDeclare(ch, publisher.exchange)
 	for {
 		messageToPublish := <-publisher.outputMessages
 		err := publisher.publish(ch, messageToPublish)
