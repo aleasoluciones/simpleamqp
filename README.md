@@ -3,7 +3,9 @@
 [![GoDoc](https://godoc.org/github.com/aleasoluciones/simpleamqp?status.png)](http://godoc.org/github.com/aleasoluciones/simpleamqp)
 
 SimpleAMQP is a minimal wrapper around the excelent AMQP library [github.com/streadway/amqp](http://github.com/streadway/amqp)
-It provided a AMQP Consumer and a AMQP Publisher.
+It provided a AMQP Consumer and a AMQP Publisher.It was designed with the following goals in mind:
+ * minimal api to create microservices that reacts to a events and publish events
+
 
 ## Uses Cases
 ### Publish to a exchange
