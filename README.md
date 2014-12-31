@@ -2,10 +2,11 @@
 [![Build Status](https://travis-ci.org/aleasoluciones/simpleamqp.svg?branch=master)](https://travis-ci.org/aleasoluciones/simpleamqp)
 [![GoDoc](https://godoc.org/github.com/aleasoluciones/simpleamqp?status.png)](http://godoc.org/github.com/aleasoluciones/simpleamqp)
 
-SimpleAMQP is a minimal wrapper around the excelent AMQP library [github.com/streadway/amqp](http://github.com/streadway/amqp)
-It provided a AMQP Consumer and a AMQP Publisher.It was designed with the following goals in mind:
- * minimal api to create microservices that reacts to a events and publish events
-
+SimpleAMQP is very opinionated minimal wrapper around the excelent AMQP library [github.com/streadway/amqp](http://github.com/streadway/amqp), created to help implement microservices with the following characteristic:
+ * Publish all the domain especific events to a exchange 
+ * Reacts to events from a exchange
+ * Long running processes that tries to be always running
+ * Best effort to send or receive the message
 
 ## Uses Cases
 ### Publish to a exchange
@@ -28,4 +29,4 @@ Publish messages to a exchange without blocking the producing
  * Reconnect when no messages received in a configurable amount of time (to detect some kind of connection problems at NATED networks where the NATED connection expires)
 
 ## Tests
-To run the integration tests, make sure you have RabbitMQ running on any host, export the environment variable AMQP_URL=amqp://host/ and run go test -tags integration. TravisCI will also run the integration tests.
+To run the integration tests, make sure you have RabbitMQ running on any host, export the environment variable AMQP_URL=amqp://host/ and run **go test -tags integration**. TravisCI will also run the integration tests.
