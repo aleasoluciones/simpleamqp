@@ -12,6 +12,10 @@ type messageToPublish struct {
 	message    []byte
 }
 
+type AMQPPublisher interface {
+	Publish(routingKey string, message []byte)
+}
+
 type AmqpPublisher struct {
 	brokerUri      string
 	exchange       string
