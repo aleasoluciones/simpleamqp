@@ -28,5 +28,12 @@ Publish messages to a exchange without blocking the producing
  * Reconnect in case of connection error
  * Reconnect when no messages received in a configurable amount of time (to detect some kind of connection problems at NATED networks where the NATED connection expires)
 
+#### Known Issues
+ * When there is a connection problem, some messages can be lost
+
+#### Unimplemente features
+ * Exchange options not configurable
+ * Queue options not configurable
+
 ## Tests
 To run the integration tests, make sure you have RabbitMQ running on any host, export the environment variable AMQP_URL=amqp://host/ and run **go test -tags integration**. TravisCI will also run the integration tests.
