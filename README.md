@@ -21,6 +21,7 @@ Publish messages to a exchange without blocking the producing
 
 #### Unimplemente features
  * Exchange options not configurable
+ * Message headers and characteristics (delivery mode, ttl, ...) not configurable
 
 ### Receive messages from a exchange
 #### Features
