@@ -43,3 +43,24 @@ func exchangeDeclare(ch *amqp.Channel, exchange string) {
 		}
 	}
 }
+
+func queueDeclare(ch *amqp.Channel, queue string) amqp.Queue {
+	for {
+		log.Println("Queue declare", queue)
+		q, err := ch.QueueDeclare(
+			queue, // name of the queue
+			true,  // durable
+			false, // delete when unused
+			false, // exclusive
+			false, // noWait
+			nil,   // arguments
+		)
+		if err != nil {
+			log.Println("Error declaring queue", err)
+			time.Sleep(TIME_TO_RECONNECT)
+			continue
+		} else {
+			return q
+		}
+	}
+}

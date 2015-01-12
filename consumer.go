@@ -38,9 +38,8 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			defer ch.Close()
 
 			exchangeDeclare(ch, exchange)
+			q := queueDeclare(ch, queue)
 
-			log.Println("Queue declare", queue)
-			q, _ := ch.QueueDeclare(queue, true, false, false, false, nil)
 			for _, routingKey := range routingKeys {
 				_ = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
 			}
