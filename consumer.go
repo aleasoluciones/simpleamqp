@@ -52,15 +52,15 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 					if more {
 						output <- AmqpMessage{Body: string(message.Body)}
 					} else {
-						log.Println("No more messages... closing channel to reconnect")
+						log.Println("[simpleamqp] No more messages... closing channel to reconnect")
 						closed = true
 					}
 				case <-time.After(queueTimeout):
-					log.Println("Too much time without messages... closing channel to reconnect")
+					log.Println("[simpleamqp] Too much time without messages... closing channel to reconnect")
 					closed = true
 				}
 			}
-			log.Println("Waiting befor reconnect")
+			log.Println("[simpleamqp] Waiting befor reconnect")
 			time.Sleep(TIME_TO_RECONNECT)
 		}
 	}()
