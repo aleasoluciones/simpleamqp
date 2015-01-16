@@ -34,8 +34,6 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 	go func() {
 		for {
 			conn, ch := setup(client.brokerUri)
-			defer conn.Close()
-			defer ch.Close()
 
 			exchangeDeclare(ch, exchange)
 			q := queueDeclare(ch, queue)
@@ -60,6 +58,11 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 					closed = true
 				}
 			}
+
+			log.Println("[simpleamqp] Closing connection ...")
+			ch.Close()
+			conn.Close()
+
 			log.Println("[simpleamqp] Waiting befor reconnect")
 			time.Sleep(TIME_TO_RECONNECT)
 		}
