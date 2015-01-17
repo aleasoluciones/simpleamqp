@@ -40,15 +40,19 @@ func NewAmqpPublisher(brokerUri, exchange string) *AmqpPublisher {
 	return &publisher
 }
 
-
 // Queue the message to be published and return inmediatly
 // The message will be published to the AmqpPublisher exchange using the given routingKey
 // If the message can't be queued (because the channel is full) a log is printed and the message is discarded
 func (publisher *AmqpPublisher) Publish(routingKey string, message []byte) {
 	messageToPublish := messageToPublish{routingKey, message}
+
+	timeoutTimer := time.NewTimer(5 * time.Second)
+	defer timeoutTimer.Stop()
+	afterTimeout := timeoutTimer.C
+
 	select {
 	case publisher.outputMessages <- messageToPublish:
-	case <-time.After(5 * time.Second):
+	case <-afterTimeout:
 		log.Println("Publish channel full", messageToPublish)
 	}
 }

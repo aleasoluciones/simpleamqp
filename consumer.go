@@ -3,6 +3,8 @@ package simpleamqp
 import (
 	"log"
 	"time"
+
+	"github.com/streadway/amqp"
 )
 
 type AMQPConsumer interface {
@@ -45,18 +47,7 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			messages, _ := ch.Consume(q.Name, "", true, false, false, false, nil)
 
 			for closed := false; closed != true; {
-				select {
-				case message, more := <-messages:
-					if more {
-						output <- AmqpMessage{Body: string(message.Body)}
-					} else {
-						log.Println("[simpleamqp] No more messages... closing channel to reconnect")
-						closed = true
-					}
-				case <-time.After(queueTimeout):
-					log.Println("[simpleamqp] Too much time without messages... closing channel to reconnect")
-					closed = true
-				}
+				closed = messageToOuput(messages, output, queueTimeout)
 			}
 
 			log.Println("[simpleamqp] Closing connection ...")
@@ -69,4 +60,25 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 	}()
 
 	return output
+}
+
+func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queueTimeout time.Duration) (closed bool) {
+	timeoutTimer := time.NewTimer(queueTimeout)
+	defer timeoutTimer.Stop()
+	afterTimeout := timeoutTimer.C
+
+	detectedClosed := false
+	select {
+	case message, more := <-messages:
+		if more {
+			output <- AmqpMessage{Body: string(message.Body)}
+		} else {
+			log.Println("[simpleamqp] No more messages... closing channel to reconnect")
+			detectedClosed = true
+		}
+	case <-afterTimeout:
+		log.Println("[simpleamqp] Too much time without messages... closing channel to reconnect")
+		detectedClosed = true
+	}
+	return detectedClosed
 }
