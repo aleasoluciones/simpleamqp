@@ -30,7 +30,7 @@ type AmqpMessage struct {
 // Return a AmqpMessage channel to receive messages using a given queue connected to the exchange with one ore more routing keys
 // Autoreconnect on error or when we have no message after queueTimeout expired
 // The function declares the queue
-func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueTimeout time.Duration) chan AmqpMessage {
+func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage {
 	output := make(chan AmqpMessage)
 
 	go func() {
@@ -38,7 +38,7 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			conn, ch := setup(client.brokerUri)
 
 			exchangeDeclare(ch, exchange)
-			q := queueDeclare(ch, queue)
+			q := queueDeclare(ch, queue, queueOptions)
 
 			for _, routingKey := range routingKeys {
 				_ = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
