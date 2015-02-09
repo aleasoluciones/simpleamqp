@@ -17,21 +17,21 @@ type AMQPPublisher interface {
 }
 
 type AmqpPublisher struct {
-	brokerUri      string
+	brokerURI      string
 	exchange       string
 	outputMessages chan messageToPublish
 }
 
-func NewAmqpPublisher(brokerUri, exchange string) *AmqpPublisher {
+func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 	publisher := AmqpPublisher{
-		brokerUri:      brokerUri,
+		brokerURI:      brokerURI,
 		exchange:       exchange,
 		outputMessages: make(chan messageToPublish, 1024),
 	}
 
 	go func() {
 		for {
-			err := publisher.publish_loop()
+			err := publisher.publishLoop()
 			log.Println("Error", err)
 			log.Println("Waiting", TIME_TO_RECONNECT, "to reconnect")
 			time.Sleep(TIME_TO_RECONNECT)
@@ -75,8 +75,8 @@ func (publisher *AmqpPublisher) publish(channel *amqp.Channel, messageToPublish 
 
 }
 
-func (publisher *AmqpPublisher) publish_loop() error {
-	conn, ch := setup(publisher.brokerUri)
+func (publisher *AmqpPublisher) publishLoop() error {
+	conn, ch := setup(publisher.brokerURI)
 	defer conn.Close()
 	defer ch.Close()
 

@@ -12,13 +12,13 @@ type AMQPConsumer interface {
 }
 
 type AmqpConsumer struct {
-	brokerUri string
+	brokerURI string
 }
 
 // Return AMQP Consumer
-func NewAmqpConsumer(brokerUri string) *AmqpConsumer {
+func NewAmqpConsumer(brokerURI string) *AmqpConsumer {
 	return &AmqpConsumer{
-		brokerUri: brokerUri,
+		brokerURI: brokerURI,
 	}
 }
 
@@ -35,7 +35,7 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 
 	go func() {
 		for {
-			conn, ch := setup(client.brokerUri)
+			conn, ch := setup(client.brokerURI)
 
 			exchangeDeclare(ch, exchange)
 			q := queueDeclare(ch, queue, queueOptions)
