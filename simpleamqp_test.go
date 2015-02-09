@@ -26,7 +26,10 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	amqpUrl := amqpUrlFromEnv()
 	amqpPublisher := NewAmqpPublisher(amqpUrl, "events")
 	amqpConsumer := NewAmqpConsumer(amqpUrl)
-	messages := amqpConsumer.Receive("events", []string{"routingkey1"}, "test_queue", 30*time.Second)
+	messages := amqpConsumer.Receive(
+		"events", []string{"routingkey1"},
+		"", QueueOptions{Durable: false, Delete: true, Exclusive: true},
+		30*time.Second)
 	log.Println(amqpConsumer)
 
 	time.Sleep(2 * time.Second)
