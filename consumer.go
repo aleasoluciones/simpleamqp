@@ -67,6 +67,10 @@ func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queu
 	defer timeoutTimer.Stop()
 	afterTimeout := timeoutTimer.C
 
+	if queueTimeout == 0*time.Second {
+		timeoutTimer.Stop()
+	}
+
 	detectedClosed := false
 	select {
 	case message, more := <-messages:
