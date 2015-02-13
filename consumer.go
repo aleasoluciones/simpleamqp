@@ -8,7 +8,7 @@ import (
 )
 
 type AMQPConsumer interface {
-	Receive(exchange string, routingKeys []string, queue string, queueTimeout time.Duration) chan AmqpMessage
+	Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage
 }
 
 type AmqpConsumer struct {
