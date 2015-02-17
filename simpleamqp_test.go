@@ -39,7 +39,11 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 
 	message1 := <-messages
 	assert.Equal(t, message1.Body, "irrelevantBody1")
+	assert.Equal(t, message1.Exchange, "events")
+	assert.Equal(t, message1.RoutingKey, "routingkey1")
 	message2 := <-messages
 	assert.Equal(t, message2.Body, "irrelevantBody2")
+	assert.Equal(t, message2.Exchange, "events")
+	assert.Equal(t, message2.RoutingKey, "routingkey1")
 
 }
