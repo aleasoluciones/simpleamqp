@@ -26,6 +26,7 @@ Publish messages to a exchange without blocking the producing
 ### Receive messages from a exchange
 #### Features
  * Receive using various routing keys
+ * main option for the queue configurables
  * Reconnect in case of connection error
  * Reconnect when no messages received in a configurable amount of time (to detect some kind of connection problems at NATED networks where the NATED connection expires)
 
@@ -34,7 +35,6 @@ Publish messages to a exchange without blocking the producing
 
 #### Unimplemente features
  * Exchange options not configurable
- * Queue options not configurable
 
 ## Tests
 To run the integration tests, make sure you have RabbitMQ running on any host, export the environment variable AMQP_URL=amqp://host/ and run **go test -tags integration**. TravisCI will also run the integration tests.
