@@ -23,6 +23,42 @@ var DefaultQueueOptions = QueueOptions{
 	Exclusive: false,
 }
 
+type AmqpManagement struct {
+	brokerURI string
+}
+
+func NewAmqpManagement(brokerURI string) AmqpManagement {
+	return AmqpManagement{brokerURI}
+}
+
+type AmqpQueueInfo struct {
+	Name      string
+	Messages  int
+	Consumers int
+}
+
+func (i AmqpManagement) QueueDeclare(queue string, queueOptions QueueOptions) {
+	conn, ch := setup(i.brokerURI)
+	defer ch.Close()
+	defer conn.Close()
+	queueDeclare(ch, queue, queueOptions)
+
+}
+
+func (i AmqpManagement) QueueInfo(queue string) (AmqpQueueInfo, error) {
+	conn, ch := setup(i.brokerURI)
+	defer ch.Close()
+	defer conn.Close()
+
+	result, err := ch.QueueInspect(queue)
+	if err != nil {
+		return AmqpQueueInfo{}, err
+	}
+	log.Println(result)
+
+	return AmqpQueueInfo{queue, result.Messages, result.Consumers}, nil
+}
+
 func setup(url string) (*amqp.Connection, *amqp.Channel) {
 	for {
 		conn, err := amqp.Dial(url)

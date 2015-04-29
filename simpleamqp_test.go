@@ -47,3 +47,17 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	assert.Equal(t, message2.RoutingKey, "routingkey1")
 
 }
+
+func TestAmqpManagementInitialQueueInfo(t *testing.T) {
+	t.Parallel()
+	amqpUrl := amqpUrlFromEnv()
+
+	management := NewAmqpManagement(amqpUrl)
+	management.QueueDeclare("events", QueueOptions{Durable: false, Delete: true, Exclusive: false})
+
+	result, _ := management.QueueInfo("events")
+
+	assert.Equal(t, result.Name, "events")
+	assert.Equal(t, result.Messages, 0)
+	assert.Equal(t, result.Consumers, 0)
+}
