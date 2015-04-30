@@ -53,11 +53,33 @@ func TestAmqpManagementInitialQueueInfo(t *testing.T) {
 	amqpUrl := amqpUrlFromEnv()
 
 	management := NewAmqpManagement(amqpUrl)
-	management.QueueDeclare("events", QueueOptions{Durable: false, Delete: true, Exclusive: false})
+	management.QueueDelete("q2")
+	management.QueueDeclare("q2", QueueOptions{Durable: false, Delete: true, Exclusive: false})
 
-	result, _ := management.QueueInfo("events")
+	result, _ := management.QueueInfo("q2")
 
-	assert.Equal(t, result.Name, "events")
-	assert.Equal(t, result.Messages, 0)
-	assert.Equal(t, result.Consumers, 0)
+	assert.Equal(t, "q2", result.Name)
+	assert.Equal(t, 0, result.Messages)
+	assert.Equal(t, 0, result.Consumers)
+}
+
+func TestAmqpManagementCountPendingMessages(t *testing.T) {
+	t.Parallel()
+	amqpUrl := amqpUrlFromEnv()
+
+	management := NewAmqpManagement(amqpUrl)
+	management.QueueDelete("q1")
+	management.QueueDeclare("q1", QueueOptions{Durable: false, Delete: true, Exclusive: false})
+
+	amqpPublisher := NewAmqpPublisher(amqpUrl, "e1")
+	management.QueueBind("q1", "e1", "#")
+	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
+	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"))
+
+	result, _ := management.QueueInfo("q1")
+
+	assert.Equal(t, "q1", result.Name)
+	assert.Equal(t, 2, result.Messages)
+	assert.Equal(t, 0, result.Consumers)
+
 }

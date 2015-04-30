@@ -45,6 +45,28 @@ func (i AmqpManagement) QueueDeclare(queue string, queueOptions QueueOptions) {
 
 }
 
+func (i AmqpManagement) QueueBind(queue, exchange, routingKey string) {
+	conn, ch := setup(i.brokerURI)
+	defer ch.Close()
+	defer conn.Close()
+
+	err := ch.QueueBind(queue, routingKey, exchange, false, nil)
+	if err != nil {
+		log.Println("[simpleamqp] Error binding ", queue, "to ", exchange, err)
+	}
+}
+
+func (i AmqpManagement) QueueDelete(queue string) {
+	conn, ch := setup(i.brokerURI)
+	defer ch.Close()
+	defer conn.Close()
+
+	_, err := ch.QueueDelete(queue, false, false, true)
+	if err != nil {
+		log.Println("[simpleamqp] Error removing", queue, err)
+	}
+}
+
 func (i AmqpManagement) QueueInfo(queue string) (AmqpQueueInfo, error) {
 	conn, ch := setup(i.brokerURI)
 	defer ch.Close()
@@ -54,8 +76,6 @@ func (i AmqpManagement) QueueInfo(queue string) (AmqpQueueInfo, error) {
 	if err != nil {
 		return AmqpQueueInfo{}, err
 	}
-	log.Println(result)
-
 	return AmqpQueueInfo{queue, result.Messages, result.Consumers}, nil
 }
 
