@@ -74,6 +74,7 @@ func (i AmqpManagement) QueueInfo(queue string) (AmqpQueueInfo, error) {
 
 	result, err := ch.QueueInspect(queue)
 	if err != nil {
+		log.Println("[simpleamqp] Error inspecting queue", queue, err)
 		return AmqpQueueInfo{}, err
 	}
 	return AmqpQueueInfo{queue, result.Messages, result.Consumers}, nil
