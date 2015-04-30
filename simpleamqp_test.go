@@ -3,7 +3,6 @@ package simpleamqp_test
 // +build integration
 
 import (
-	"log"
 	"os"
 	"time"
 
