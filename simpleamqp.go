@@ -23,63 +23,6 @@ var DefaultQueueOptions = QueueOptions{
 	Exclusive: false,
 }
 
-type AmqpManagement struct {
-	brokerURI string
-}
-
-func NewAmqpManagement(brokerURI string) AmqpManagement {
-	return AmqpManagement{brokerURI}
-}
-
-type AmqpQueueInfo struct {
-	Name      string
-	Messages  int
-	Consumers int
-}
-
-func (i AmqpManagement) QueueDeclare(queue string, queueOptions QueueOptions) {
-	conn, ch := setup(i.brokerURI)
-	defer ch.Close()
-	defer conn.Close()
-	queueDeclare(ch, queue, queueOptions)
-
-}
-
-func (i AmqpManagement) QueueBind(queue, exchange, routingKey string) {
-	conn, ch := setup(i.brokerURI)
-	defer ch.Close()
-	defer conn.Close()
-
-	err := ch.QueueBind(queue, routingKey, exchange, false, nil)
-	if err != nil {
-		log.Println("[simpleamqp] Error binding ", queue, "to ", exchange, err)
-	}
-}
-
-func (i AmqpManagement) QueueDelete(queue string) {
-	conn, ch := setup(i.brokerURI)
-	defer ch.Close()
-	defer conn.Close()
-
-	_, err := ch.QueueDelete(queue, false, false, true)
-	if err != nil {
-		log.Println("[simpleamqp] Error removing", queue, err)
-	}
-}
-
-func (i AmqpManagement) QueueInfo(queue string) (AmqpQueueInfo, error) {
-	conn, ch := setup(i.brokerURI)
-	defer ch.Close()
-	defer conn.Close()
-
-	result, err := ch.QueueInspect(queue)
-	if err != nil {
-		log.Println("[simpleamqp] Error inspecting queue", queue, err)
-		return AmqpQueueInfo{}, err
-	}
-	return AmqpQueueInfo{queue, result.Messages, result.Consumers}, nil
-}
-
 func setup(url string) (*amqp.Connection, *amqp.Channel) {
 	for {
 		conn, err := amqp.Dial(url)
