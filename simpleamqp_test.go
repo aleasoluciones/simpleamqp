@@ -68,8 +68,6 @@ func TestAmqpManagementCountPendingMessages(t *testing.T) {
 	management.QueueDeclare("q_count_pending_messages", QueueOptions{Durable: false, Delete: true, Exclusive: false})
 
 	amqpPublisher := NewAmqpPublisher(amqpUrl, "e1")
-	// We should wait until the real async queue creation
-	time.Sleep(2 * time.Second)
 
 	management.QueueBind("q_count_pending_messages", "e1", "#")
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
@@ -94,8 +92,6 @@ func TestAmqpManagementCountConsumers(t *testing.T) {
 		QueueOptions{Durable: true, Delete: false, Exclusive: false},
 		30*time.Second)
 
-	// We should wait until the real async queue creation
-	time.Sleep(2 * time.Second)
 	result, _ := management.QueueInfo("q_count_consumers")
 
 	assert.Equal(t, "q_count_consumers", result.Name)
