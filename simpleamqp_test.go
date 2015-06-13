@@ -30,9 +30,6 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 		"", QueueOptions{Durable: false, Delete: true, Exclusive: true},
 		30*time.Second)
 
-	// We should wait until the real async queue creation
-	time.Sleep(2 * time.Second)
-
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"))
 

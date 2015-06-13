@@ -35,18 +35,11 @@ type AmqpMessage struct {
 func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage {
 	output := make(chan AmqpMessage)
 
+	conn, ch, qname := client.setupConsuming(exchange, routingKeys, queue, queueOptions)
+
 	go func() {
 		for {
-			conn, ch := setup(client.brokerURI)
-
-			exchangeDeclare(ch, exchange)
-			q := queueDeclare(ch, queue, queueOptions)
-
-			for _, routingKey := range routingKeys {
-				_ = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
-			}
-
-			messages, _ := ch.Consume(q.Name, "", true, false, false, false, nil)
+			messages, _ := ch.Consume(qname, "", true, false, false, false, nil)
 
 			for closed := false; closed != true; {
 				closed = messageToOuput(messages, output, queueTimeout)
@@ -58,10 +51,25 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 
 			log.Println("[simpleamqp] Waiting befor reconnect")
 			time.Sleep(TIME_TO_RECONNECT)
+
+			conn, ch, qname = client.setupConsuming(exchange, routingKeys, queue, queueOptions)
 		}
 	}()
 
 	return output
+}
+
+func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) (*amqp.Connection, *amqp.Channel, string) {
+	conn, ch := setup(client.brokerURI)
+
+	exchangeDeclare(ch, exchange)
+
+	q := queueDeclare(ch, queue, queueOptions)
+
+	for _, routingKey := range routingKeys {
+		_ = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
+	}
+	return conn, ch, q.Name
 }
 
 func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queueTimeout time.Duration) (closed bool) {
