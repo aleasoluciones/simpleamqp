@@ -15,6 +15,7 @@ env:
 
 script:
   - go build
+  - go vet
   - go build examples/consumer/consumer.go
   - go build examples/publisher/publisher.go
   - go test -tags integration ./...

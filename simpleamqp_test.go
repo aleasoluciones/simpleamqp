@@ -1,6 +1,6 @@
-package simpleamqp_test
-
 // +build integration
+
+package simpleamqp_test
 
 import (
 	"os"
