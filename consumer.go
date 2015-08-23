@@ -29,8 +29,9 @@ type AmqpMessage struct {
 	Body       string
 }
 
-// Return a AmqpMessage channel to receive messages using a given queue connected to the exchange with one ore more routing keys
-// Autoreconnect on error or when we have no message after queueTimeout expired
+
+// Receive Return a AmqpMessage channel to receive messages using a given queue connected to the exchange with one ore more routing keys
+// Autoreconnect on error or when we have no message after queueTimeout expired. Use 0 when not timeout is required.
 // The function declares the queue
 func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage {
 	output := make(chan AmqpMessage)
@@ -58,6 +59,12 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 
 	return output
 }
+
+// ReceiveWithoutTimeout the same behavior that Receive method, but without using a timeout for receiving from the queue
+func (client *AmqpConsumer) ReceiveWithoutTimeout(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) chan AmqpMessage {
+     return client.Receive(exchange, routingKeys, queue, queueOptions, 0*time.Second)
+}
+
 
 func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) (*amqp.Connection, *amqp.Channel, string) {
 	conn, ch := setup(client.brokerURI)

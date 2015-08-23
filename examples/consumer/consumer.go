@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"time"
 
 	"github.com/aleasoluciones/simpleamqp"
 )
@@ -15,10 +14,9 @@ func main() {
 	flag.Parse()
 
 	amqpConsumer := simpleamqp.NewAmqpConsumer(amqpuri)
-	messages := amqpConsumer.Receive("events",
+	messages := amqpConsumer.ReceiveWithoutTimeout("events",
 		[]string{"efa1", "efa2"},
-		"", simpleamqp.QueueOptions{Durable: false, Delete: true, Exclusive: true},
-		30*time.Second)
+		"", simpleamqp.QueueOptions{Durable: false, Delete: true, Exclusive: true})
 	for message := range messages {
 		log.Println(message)
 	}
