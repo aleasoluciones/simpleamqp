@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	TIME_TO_RECONNECT = 5 * time.Second
+	timeToReconnect = 5 * time.Second
 )
 
 type QueueOptions struct {
@@ -28,14 +28,14 @@ func setup(url string) (*amqp.Connection, *amqp.Channel) {
 		conn, err := amqp.Dial(url)
 		if err != nil {
 			log.Println("Error dial", err)
-			time.Sleep(TIME_TO_RECONNECT)
+			time.Sleep(timeToReconnect)
 			continue
 		}
 
 		ch, err := conn.Channel()
 		if err != nil {
 			log.Println("Error channel", err)
-			time.Sleep(TIME_TO_RECONNECT)
+			time.Sleep(timeToReconnect)
 			continue
 		}
 		return conn, ch
@@ -48,7 +48,7 @@ func exchangeDeclare(ch *amqp.Channel, exchange string) {
 		err := ch.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
 		if err != nil {
 			log.Println("Error declaring exchange", err)
-			time.Sleep(TIME_TO_RECONNECT)
+			time.Sleep(timeToReconnect)
 			continue
 		} else {
 			return
@@ -69,7 +69,7 @@ func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) amq
 		)
 		if err != nil {
 			log.Println("Error declaring queue", err)
-			time.Sleep(TIME_TO_RECONNECT)
+			time.Sleep(timeToReconnect)
 			continue
 		} else {
 			return q

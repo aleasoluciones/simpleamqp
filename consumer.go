@@ -51,7 +51,7 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			conn.Close()
 
 			log.Println("[simpleamqp] Waiting befor reconnect")
-			time.Sleep(TIME_TO_RECONNECT)
+			time.Sleep(timeToReconnect)
 
 			conn, ch, qname = client.setupConsuming(exchange, routingKeys, queue, queueOptions)
 		}
