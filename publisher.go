@@ -87,6 +87,6 @@ func (publisher *AmqpPublisher) publishLoop() error {
 		if err != nil {
 			return err
 		}
-		log.Println("Published", string(messageToPublish.message))
+		log.Println("Published", messageToPublish.routingKey, string(messageToPublish.message))
 	}
 }
