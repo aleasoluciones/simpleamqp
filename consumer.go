@@ -84,6 +84,7 @@ func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queu
 	afterTimeout := timeoutTimer.C
 
 	if queueTimeout == 0*time.Second {
+		log.Println("[simpleamqp] messageToOutput no timeout for receiving")
 		timeoutTimer.Stop()
 	}
 
