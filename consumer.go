@@ -79,27 +79,32 @@ func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string
 }
 
 func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queueTimeout time.Duration) (closed bool) {
+
+	if queueTimeout == 0*time.Second {
+		message, more := <-messages
+		if more {
+			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body)}
+			return false
+		}
+		log.Println("[simpleamqp] No more messages... closing channel to reconnect")
+		return true
+	}
+
 	timeoutTimer := time.NewTimer(queueTimeout)
 	defer timeoutTimer.Stop()
 	afterTimeout := timeoutTimer.C
 
-	if queueTimeout == 0*time.Second {
-		log.Println("Stoping the timer, no queueTimeout used")
-		timeoutTimer.Stop()
-	}
-
-	detectedClosed := false
 	select {
 	case message, more := <-messages:
 		if more {
 			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body)}
-		} else {
-			log.Println("[simpleamqp] No more messages... closing channel to reconnect")
-			detectedClosed = true
+			return false
 		}
+		log.Println("[simpleamqp] No more messages... closing channel to reconnect")
+		return true
 	case <-afterTimeout:
 		log.Println("[simpleamqp] Too much time without messages... closing channel to reconnect")
-		detectedClosed = true
+		return true
 	}
-	return detectedClosed
+
 }
