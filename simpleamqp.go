@@ -3,6 +3,7 @@ package simpleamqp
 import (
 	"log"
 	"time"
+	"strings"
 
 	"github.com/streadway/amqp"
 )
@@ -23,9 +24,13 @@ var DefaultQueueOptions = QueueOptions{
 	Exclusive: false,
 }
 
+func normalizeURL(url string) string{
+     return strings.Replace(url, "rabbitmq://", "amqp://", -1)
+}
+
 func setup(url string) (*amqp.Connection, *amqp.Channel) {
 	for {
-		conn, err := amqp.Dial(url)
+		conn, err := amqp.Dial(normalizeURL(url))
 		if err != nil {
 			log.Println("Error dial", err)
 			time.Sleep(timeToReconnect)
