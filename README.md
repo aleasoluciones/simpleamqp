@@ -12,14 +12,14 @@ SimpleAMQP is very opinionated minimal wrapper around the excelent AMQP library 
 ### Publish to a exchange
 Publish messages to a exchange without blocking the producing
 #### Features
- * Reconnect when a messege can't be delvered
+ * Reconnect when a message can't be delivered
  * Message buffer to avoid blocking the publisher
  * Discard messages when the message buffer is full due to a connection problem
 
 #### Known Issues
  * When there is a connection problem, some messages can be lost
 
-#### Unimplemente features
+#### Unimplemented features
  * Exchange options not configurable
  * Message headers and characteristics (delivery mode, ttl, ...) not configurable
 
@@ -33,7 +33,7 @@ Publish messages to a exchange without blocking the producing
 #### Known Issues
  * When there is a connection problem, some messages can be lost
 
-#### Unimplemente features
+#### Unimplemented features
  * Exchange options not configurable
 
 ## Tests
