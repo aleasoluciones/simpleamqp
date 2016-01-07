@@ -21,7 +21,6 @@ func amqpUrlFromEnv() string {
 }
 
 func TestPublishAndReceiveTwoMessages(t *testing.T) {
-	t.Parallel()
 	amqpUrl := amqpUrlFromEnv()
 	amqpPublisher := NewAmqpPublisher(amqpUrl, "events")
 	amqpConsumer := NewAmqpConsumer(amqpUrl)
@@ -42,4 +41,30 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	assert.Equal(t, message2.Exchange, "events")
 	assert.Equal(t, message2.RoutingKey, "routingkey1")
 
+}
+
+func TestPublishWithTTL(t *testing.T) {
+	amqpUrl := amqpUrlFromEnv()
+	amqpPublisher := NewAmqpPublisher(amqpUrl, "events")
+	amqpConsumer := NewAmqpConsumer(amqpUrl)
+
+	_, ch := Setup(amqpUrl)
+	q := QueueDeclare(ch, "message_with_ttl_queue", QueueOptions{Durable: false, Delete: true, Exclusive: false})
+	_ = ch.QueueBind(q.Name, "routingkey2", "events", false, nil)
+
+	amqpPublisher.PublishWithTTL("routingkey2", []byte("irrelevantBody1"), 500)
+
+	time.Sleep(500 * time.Millisecond)
+
+	messages := amqpConsumer.Receive(
+		"events", []string{"routingkey2"},
+		"message_with_ttl_queue", QueueOptions{Durable: false, Delete: true, Exclusive: false},
+		30*time.Second)
+
+	select {
+	case _ = <-messages:
+		assert.Equal(t, false, true)
+	case <-time.NewTicker(500 * time.Millisecond).C:
+		assert.Equal(t, false, false)
+	}
 }

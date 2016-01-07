@@ -2,8 +2,8 @@ package simpleamqp
 
 import (
 	"log"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -24,11 +24,11 @@ var DefaultQueueOptions = QueueOptions{
 	Exclusive: false,
 }
 
-func normalizeURL(url string) string{
-     return strings.Replace(url, "rabbitmq://", "amqp://", -1)
+func normalizeURL(url string) string {
+	return strings.Replace(url, "rabbitmq://", "amqp://", -1)
 }
 
-func setup(url string) (*amqp.Connection, *amqp.Channel) {
+func Setup(url string) (*amqp.Connection, *amqp.Channel) {
 	for {
 		conn, err := amqp.Dial(normalizeURL(url))
 		if err != nil {
@@ -61,7 +61,7 @@ func exchangeDeclare(ch *amqp.Channel, exchange string) {
 	}
 }
 
-func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) amqp.Queue {
+func QueueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) amqp.Queue {
 	for {
 		log.Println("Queue declare", queue)
 		q, err := ch.QueueDeclare(

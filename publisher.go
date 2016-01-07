@@ -2,6 +2,7 @@ package simpleamqp
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -10,10 +11,12 @@ import (
 type messageToPublish struct {
 	routingKey string
 	message    []byte
+	expiration string
 }
 
 type AMQPPublisher interface {
-	Publish(routingKey string, message []byte)
+	Publish(string, []byte)
+	PublishWithTTL(string, []byte, int)
 }
 
 type AmqpPublisher struct {
@@ -40,12 +43,19 @@ func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 	return &publisher
 }
 
+func (publisher *AmqpPublisher) Publish(routingKey string, message []byte) {
+	messageToPublish := messageToPublish{routingKey: routingKey, message: message}
+	publisher.queueMessageToPublish(messageToPublish)
+}
+
+func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte, ttl int) {
+	publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, expiration: strconv.Itoa(ttl)})
+}
+
 // Queue the message to be published and return inmediatly
 // The message will be published to the AmqpPublisher exchange using the given routingKey
 // If the message can't be queued (because the channel is full) a log is printed and the message is discarded
-func (publisher *AmqpPublisher) Publish(routingKey string, message []byte) {
-	messageToPublish := messageToPublish{routingKey, message}
-
+func (publisher *AmqpPublisher) queueMessageToPublish(messageToPublish messageToPublish) {
 	timeoutTimer := time.NewTimer(5 * time.Second)
 	defer timeoutTimer.Stop()
 	afterTimeout := timeoutTimer.C
@@ -70,13 +80,14 @@ func (publisher *AmqpPublisher) publish(channel *amqp.Channel, messageToPublish 
 			Body:            messageToPublish.message,
 			DeliveryMode:    amqp.Transient,
 			Priority:        0,
+			Expiration:      messageToPublish.expiration,
 		})
 	return err
 
 }
 
 func (publisher *AmqpPublisher) publishLoop() error {
-	conn, ch := setup(publisher.brokerURI)
+	conn, ch := Setup(publisher.brokerURI)
 	defer conn.Close()
 	defer ch.Close()
 
@@ -85,6 +96,7 @@ func (publisher *AmqpPublisher) publishLoop() error {
 		messageToPublish := <-publisher.outputMessages
 		err := publisher.publish(ch, messageToPublish)
 		if err != nil {
+			log.Println("Error publishing message:", err)
 			return err
 		}
 		log.Println("Published", messageToPublish.routingKey, string(messageToPublish.message))
