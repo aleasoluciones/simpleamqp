@@ -63,8 +63,7 @@ func TestPublishWithTTL(t *testing.T) {
 
 	select {
 	case _ = <-messages:
-		assert.Equal(t, false, true)
-	case <-time.NewTicker(500 * time.Millisecond).C:
-		assert.Equal(t, false, false)
+		t.Error("Should not receive any message")
+	case <-time.After(500 * time.Millisecond):
 	}
 }
