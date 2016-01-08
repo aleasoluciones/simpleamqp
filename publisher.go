@@ -95,7 +95,6 @@ func (publisher *AmqpPublisher) publishLoop() error {
 		messageToPublish := <-publisher.outputMessages
 		err := publisher.publish(ch, messageToPublish)
 		if err != nil {
-			log.Println("Error publishing message:", err)
 			return err
 		}
 		log.Println("Published", messageToPublish.routingKey, string(messageToPublish.message))
