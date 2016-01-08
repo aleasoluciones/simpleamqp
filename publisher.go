@@ -44,8 +44,7 @@ func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 }
 
 func (publisher *AmqpPublisher) Publish(routingKey string, message []byte) {
-	messageToPublish := messageToPublish{routingKey: routingKey, message: message}
-	publisher.queueMessageToPublish(messageToPublish)
+	publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message})
 }
 
 func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte, ttl int) {
