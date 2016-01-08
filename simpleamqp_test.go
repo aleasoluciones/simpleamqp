@@ -45,20 +45,23 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 
 func TestPublishWithTTL(t *testing.T) {
 	amqpUrl := amqpUrlFromEnv()
-	amqpPublisher := NewAmqpPublisher(amqpUrl, "events")
-	amqpConsumer := NewAmqpConsumer(amqpUrl)
-
+	exchange := "events"
+	queueName := "message_with_ttl_queue"
+	queueOptions := QueueOptions{Durable: false, Delete: true, Exclusive: false}
 	_, ch := Setup(amqpUrl)
-	q := QueueDeclare(ch, "message_with_ttl_queue", QueueOptions{Durable: false, Delete: true, Exclusive: false})
-	_ = ch.QueueBind(q.Name, "routingkey2", "events", false, nil)
+	QueueDeclare(ch, queueName, queueOptions)
+	_ = ch.QueueBind(queueName, "routingkey2", exchange, false, nil)
 
-	amqpPublisher.PublishWithTTL("routingkey2", []byte("irrelevantBody1"), 500)
+	messageTTL := 500
+	amqpPublisher := NewAmqpPublisher(amqpUrl, exchange)
+	amqpPublisher.PublishWithTTL("routingkey2", []byte("irrelevantBody1"), messageTTL)
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(time.Duration(messageTTL) * time.Millisecond)
 
+	amqpConsumer := NewAmqpConsumer(amqpUrl)
 	messages := amqpConsumer.Receive(
-		"events", []string{"routingkey2"},
-		"message_with_ttl_queue", QueueOptions{Durable: false, Delete: true, Exclusive: false},
+		exchange, []string{"routingkey2"},
+		queueName, queueOptions,
 		30*time.Second)
 
 	select {
