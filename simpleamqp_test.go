@@ -62,7 +62,7 @@ func TestPublishWithTTL(t *testing.T) {
 		30*time.Second)
 
 	select {
-	case _ = <-messages:
+	case <-messages:
 		t.Error("Should not receive any message")
 	case <-time.After(500 * time.Millisecond):
 	}
