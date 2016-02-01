@@ -40,7 +40,10 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 
 	go func() {
 		for {
-			messages, _ := ch.Consume(qname, "", true, false, false, false, nil)
+			messages, err := ch.Consume(qname, "", true, false, false, false, nil)
+			if err != nil {
+				log.Println("[simpleamqp] Error consuming messages -> ", err)
+			}
 
 			for closed := false; closed != true; {
 				closed = messageToOuput(messages, output, queueTimeout)
