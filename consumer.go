@@ -39,6 +39,8 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 	conn, ch, qname := client.setupConsuming(exchange, routingKeys, queue, queueOptions)
 
 	go func() {
+		counter := 0
+		counterMessageToOutput := 0
 		for {
 			messages, err := ch.Consume(qname, "", true, false, false, false, nil)
 			if err != nil {
@@ -46,8 +48,21 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			}
 
 			for closed := false; closed != true; {
+				if counterMessageToOutput %= 10; counterMessageToOutput == 0 {
+					log.Println("[simpleamqp] I'm Alive!!! messageToOuput outputChannel", output, " and messagesChannel ", messages)
+				}
+
 				closed = messageToOuput(messages, output, queueTimeout)
+				if counterMessageToOutput %= 10; counterMessageToOutput == 0 {
+					log.Println("[simpleamqp] I'm Alive!!! messageToOuput closed value:", closed)
+				}
+				counterMessageToOutput++
 			}
+
+			if counter %= 10; counter == 0 {
+				log.Println("[simpleamqp] I'm Alive!!! with queueTimeout", queueTimeout)
+			}
+			counter++
 
 			log.Println("[simpleamqp] Closing connection ...")
 			ch.Close()
@@ -57,6 +72,7 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			time.Sleep(timeToReconnect)
 
 			conn, ch, qname = client.setupConsuming(exchange, routingKeys, queue, queueOptions)
+
 		}
 	}()
 
@@ -89,7 +105,7 @@ func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queu
 			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body)}
 			return false
 		}
-		log.Println("[simpleamqp] No more messages... closing channel to reconnect")
+		log.Println("[simpleamqp] No more messages... closing channel to reconnect with timeout zero")
 		return true
 	}
 
