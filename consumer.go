@@ -100,9 +100,13 @@ func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string
 func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queueTimeout time.Duration) (closed bool) {
 
 	if queueTimeout == 0*time.Second {
+		log.Println("[simpleamqp] PRE read message")
 		message, more := <-messages
+		log.Println("[simpleamqp] POST read message")
 		if more {
+			log.Println("[simpleamqp] more PRE post message")
 			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body)}
+			log.Println("[simpleamqp] more POST post message")
 			return false
 		}
 		log.Println("[simpleamqp] No more messages... closing channel to reconnect with timeout zero")
