@@ -9,6 +9,7 @@ go:
 before_install:
   - go get -v ./...
   - go get github.com/stretchr/testify/assert
+  - go get -u github.com/golang/lint/golint
 
 
 services:
@@ -19,7 +20,8 @@ env:
 
 script:
   - go build
-  - go vet
+  - golint ./...
+  - go vet ./...
   - go build examples/consumer/consumer.go
   - go build examples/publisher/publisher.go
   - go test -tags integration ./...
