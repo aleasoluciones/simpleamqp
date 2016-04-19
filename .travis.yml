@@ -4,11 +4,7 @@ go:
  - 1.6
  - tip
 
-before_install:
-  - go get -v ./...
-  - go get github.com/stretchr/testify/assert
-  - go get -u github.com/golang/lint/golint
-
+sudo: false
 
 services:
   - rabbitmq
@@ -17,9 +13,4 @@ env:
  - AMQP_URL=amqp://guest:guest@127.0.0.1:5672/
 
 script:
-  - go build
-  - golint ./...
-  - go vet ./...
-  - go build examples/consumer/consumer.go
-  - go build examples/publisher/publisher.go
-  - go test -tags integration ./...
+  - make all
