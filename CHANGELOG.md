@@ -1,3 +1,7 @@
+# 2016-10-26
+
+* Internal: Added go 1.7 version to travis
+
 # 2016-04-19
 
 * Internal: Unify Makefile and travis.yml
