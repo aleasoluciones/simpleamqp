@@ -1,3 +1,7 @@
+# 2017-12-14
+
+* Internal: Added go 1.9.2 version to travis
+
 # 2016-10-26
 
 * Internal: Added go 1.7 version to travis
