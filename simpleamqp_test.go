@@ -56,7 +56,7 @@ func TestPublishWithTTL(t *testing.T) {
 	amqpPublisher := NewAmqpPublisher(amqpUrl, exchange)
 	amqpPublisher.PublishWithTTL("routingkey2", []byte("irrelevantBody1"), messageTTL)
 
-	time.Sleep((time.Duration(messageTTL) + 3 ) * time.Millisecond)
+	time.Sleep((time.Duration(messageTTL) + 13 ) * time.Millisecond)
 
 	amqpConsumer := NewAmqpConsumer(amqpUrl)
 	messages := amqpConsumer.Receive(
