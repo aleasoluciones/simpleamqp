@@ -1,3 +1,11 @@
+# 2018-01-30
+
+* Internal: Updated to use dependency management correctly
+            - Updated Makfile
+            - Updated .jenkins 
+            - Updated .gitignore to exclude vendor directory and another files
+            - Added godeps information
+
 # 2018-01-03
 
 * Internal: Updated mocks
