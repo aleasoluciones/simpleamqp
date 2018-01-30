@@ -28,3 +28,6 @@ _testmain.go
 /*.iml
 
 .*.sw[po]
+
+# Exclude vendor directory (godep dependency manager tool)
+vendor
