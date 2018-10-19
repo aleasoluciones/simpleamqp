@@ -6,18 +6,18 @@ install_dep_tool:
 	go get github.com/tools/godep
 
 install_go_linter:
-	go get -u -v github.com/golang/lint/golint
+	go get -u -v golang.org/x/lint/golint
 
 initialize_deps:
 	go get -d -v ./...
 	go get -d -v github.com/stretchr/testify/assert
-	go get -v github.com/golang/lint/golint
+	go get -v golang.org/x/lint/golint
 	godep save
 
 update_deps:
 	godep go get -d -v ./...
 	godep go get -d -v github.com/stretchr/testify/assert
-	godep go get -v github.com/golang/lint/golint
+	godep go get -v golang.org/x/lint/golint
 	godep update ./...
 
 test:
