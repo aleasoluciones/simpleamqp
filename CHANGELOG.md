@@ -1,8 +1,14 @@
+# 2018-10-29
+
+* Internal: Update go version 1.10 and 1.11
+* Internal: Update godep version
+
+
 # 2018-01-30
 
 * Internal: Updated to use dependency management correctly
             - Updated Makfile
-            - Updated .jenkins 
+            - Updated .jenkins
             - Updated .gitignore to exclude vendor directory and another files
             - Added godeps information
 
