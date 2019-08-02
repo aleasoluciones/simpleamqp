@@ -9,6 +9,11 @@ sudo: false
 services:
   - rabbitmq
 
+addons:
+  apt:
+    packages:
+    - rabbitmq-server
+
 env:
  - AMQP_URL=amqp://guest:guest@127.0.0.1:5672/
 
