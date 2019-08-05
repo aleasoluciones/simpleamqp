@@ -9,6 +9,11 @@ sudo: false
 services:
   - rabbitmq
 
+# safelist branch to build
+branches:
+  only:
+      - master
+
 addons:
   apt:
     packages:
