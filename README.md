@@ -1,5 +1,5 @@
 #simpleamqp
-[![Build Status](https://travis-ci.org/aleasoluciones/simpleamqp.svg?branch=master)](https://travis-ci.org/aleasoluciones/simpleamqp)
+[![Build Status](https://travis-ci.com/aleasoluciones/simpleamqp.svg?branch=master)](https://travis-ci.com/aleasoluciones/simpleamqp)
 [![GoDoc](https://godoc.org/github.com/aleasoluciones/simpleamqp?status.png)](http://godoc.org/github.com/aleasoluciones/simpleamqp)
 
 SimpleAMQP is very opinionated minimal wrapper around the excelent AMQP library [github.com/streadway/amqp](http://github.com/streadway/amqp), created to help implement microservices with the following characteristic:
