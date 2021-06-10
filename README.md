@@ -1,4 +1,5 @@
-#simpleamqp
+# simpleamqp
+
 [![Build Status](https://travis-ci.com/aleasoluciones/simpleamqp.svg?branch=master)](https://travis-ci.com/aleasoluciones/simpleamqp)
 [![GoDoc](https://godoc.org/github.com/aleasoluciones/simpleamqp?status.png)](http://godoc.org/github.com/aleasoluciones/simpleamqp)
 
