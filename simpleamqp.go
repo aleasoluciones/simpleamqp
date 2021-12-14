@@ -40,6 +40,7 @@ func Setup(url string) (*amqp.Connection, *amqp.Channel) {
 		ch, err := conn.Channel()
 		if err != nil {
 			log.Println("Error channel", err)
+			conn.Close()
 			time.Sleep(timeToReconnect)
 			continue
 		}
