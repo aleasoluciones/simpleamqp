@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func amqpUrlFromEnv() string {
+func amqpURLFromEnv() string {
 	url := os.Getenv("AMQP_URL")
 	if url == "" {
 		url = "amqp://"
@@ -20,9 +20,9 @@ func amqpUrlFromEnv() string {
 }
 
 func TestPublishAndReceiveTwoMessages(t *testing.T) {
-	amqpUrl := amqpUrlFromEnv()
-	amqpPublisher := NewAmqpPublisher(amqpUrl, "events")
-	amqpConsumer := NewAmqpConsumer(amqpUrl)
+	amqpURL := amqpURLFromEnv()
+	amqpPublisher := NewAmqpPublisher(amqpURL, "events")
+	amqpConsumer := NewAmqpConsumer(amqpURL)
 	messages := amqpConsumer.Receive(
 		"events", []string{"routingkey1"},
 		"", QueueOptions{Durable: false, Delete: true, Exclusive: true},
@@ -43,21 +43,21 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 }
 
 func TestPublishWithTTL(t *testing.T) {
-	amqpUrl := amqpUrlFromEnv()
+	amqpURL := amqpURLFromEnv()
 	exchange := "events"
 	queueName := "message_with_ttl_queue"
 	queueOptions := QueueOptions{Durable: false, Delete: true, Exclusive: false}
-	_, ch := setup(amqpUrl)
+	_, ch := setup(amqpURL)
 	queueDeclare(ch, queueName, queueOptions)
 	_ = ch.QueueBind(queueName, "routingkey2", exchange, false, nil)
 
 	messageTTL := 500
-	amqpPublisher := NewAmqpPublisher(amqpUrl, exchange)
+	amqpPublisher := NewAmqpPublisher(amqpURL, exchange)
 	amqpPublisher.PublishWithTTL("routingkey2", []byte("irrelevantBody1"), messageTTL)
 
 	time.Sleep((time.Duration(messageTTL + 13)) * time.Millisecond)
 
-	amqpConsumer := NewAmqpConsumer(amqpUrl)
+	amqpConsumer := NewAmqpConsumer(amqpURL)
 	messages := amqpConsumer.Receive(
 		exchange, []string{"routingkey2"},
 		queueName, queueOptions,
