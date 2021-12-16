@@ -1,6 +1,6 @@
 // +build integration
 
-package simpleamqp_test
+package simpleamqp
 
 import (
 	"os"
@@ -8,7 +8,6 @@ import (
 
 	"testing"
 
-	. "github.com/aleasoluciones/simpleamqp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,8 +47,8 @@ func TestPublishWithTTL(t *testing.T) {
 	exchange := "events"
 	queueName := "message_with_ttl_queue"
 	queueOptions := QueueOptions{Durable: false, Delete: true, Exclusive: false}
-	_, ch := Setup(amqpUrl)
-	QueueDeclare(ch, queueName, queueOptions)
+	_, ch := setup(amqpUrl)
+	queueDeclare(ch, queueName, queueOptions)
 	_ = ch.QueueBind(queueName, "routingkey2", exchange, false, nil)
 
 	messageTTL := 500

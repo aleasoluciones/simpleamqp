@@ -86,7 +86,7 @@ func (publisher *AmqpPublisher) publish(channel *amqp.Channel, messageToPublish 
 }
 
 func (publisher *AmqpPublisher) publishLoop() error {
-	conn, ch := Setup(publisher.brokerURI)
+	conn, ch := setup(publisher.brokerURI)
 	defer conn.Close()
 	defer ch.Close()
 

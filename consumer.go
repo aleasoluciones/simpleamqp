@@ -69,11 +69,11 @@ func (client *AmqpConsumer) ReceiveWithoutTimeout(exchange string, routingKeys [
 }
 
 func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) (*amqp.Connection, *amqp.Channel, string) {
-	conn, ch := Setup(client.brokerURI)
+	conn, ch := setup(client.brokerURI)
 
 	exchangeDeclare(ch, exchange)
 
-	q := QueueDeclare(ch, queue, queueOptions)
+	q := queueDeclare(ch, queue, queueOptions)
 
 	for _, routingKey := range routingKeys {
 		ch.QueueBind(q.Name, routingKey, exchange, false, nil)
