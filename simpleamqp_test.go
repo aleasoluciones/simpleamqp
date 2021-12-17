@@ -47,10 +47,7 @@ func TestPublishWithTTL(t *testing.T) {
 	exchange := "events"
 	queueName := "message_with_ttl_queue"
 	queueOptions := QueueOptions{Durable: false, Delete: true, Exclusive: false}
-	_, ch, err := setup(amqpURL)
-	if err != nil {
-		t.Error("Error connection to rabbitmq")
-	}
+	_, ch, _ := setup(amqpURL)
 	queueDeclare(ch, queueName, queueOptions)
 	_ = ch.QueueBind(queueName, "routingkey2", exchange, false, nil)
 
