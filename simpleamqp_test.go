@@ -28,6 +28,11 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 		"", QueueOptions{Durable: false, Delete: true, Exclusive: true},
 		30*time.Second)
 
+	// Sleep sometime so the consumer can create the queue and bind.
+	// Then why in the TTL test this sleep is not needed? Because
+	// we are creating the queue in a synchronous way using the private functions.
+	time.Sleep(7 * time.Second)
+
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"))
 
@@ -47,9 +52,18 @@ func TestPublishWithTTL(t *testing.T) {
 	exchange := "events"
 	queueName := "message_with_ttl_queue"
 	queueOptions := QueueOptions{Durable: false, Delete: true, Exclusive: false}
-	_, ch, _ := setup(amqpURL)
-	queueDeclare(ch, queueName, queueOptions)
-	_ = ch.QueueBind(queueName, "routingkey2", exchange, false, nil)
+	_, ch, err := setup(amqpURL)
+	if err != nil {
+		t.Error("There was an error getting the channel")
+	}
+	_, err = queueDeclare(ch, queueName, queueOptions)
+	if err != nil {
+		t.Error("There was an error declaring the queue")
+	}
+	err = ch.QueueBind(queueName, "routingkey2", exchange, false, nil)
+	if err != nil {
+		t.Error("There was an error binding the exchange with the queue using the given routing key")
+	}
 
 	messageTTL := 500
 	amqpPublisher := NewAmqpPublisher(amqpURL, exchange)
