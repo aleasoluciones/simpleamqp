@@ -14,13 +14,13 @@ type messageToPublish struct {
 	expiration string
 }
 
-// AMQPPublisher is a interface to represent AMQP Publisher that implements Publish and PublishWithTTL funtions
+// AMQPPublisher represents an AMQP Publisher that can publish messages with or without TTL
 type AMQPPublisher interface {
 	Publish(string, []byte)
 	PublishWithTTL(string, []byte, int)
 }
 
-// AmqpPublisher is a struct to hold the brokerURI, exchange name and channel where to publish messages to rabbitmq
+// AmqpPublisher holds the brokerURI, exchange name and channel where to submit messages to be publish to rabbitmq
 type AmqpPublisher struct {
 	brokerURI      string
 	exchange       string
@@ -58,7 +58,7 @@ func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte
 
 // Queue the message to be published and return inmediatly
 // The message will be published to the AmqpPublisher exchange using the given routingKey
-// If the message can't be queued (because the channel is full) a log is printed and the message is discarded
+// If the message can't be queued after some short time (because the channel is full) a log is printed and the message is discarded
 func (publisher *AmqpPublisher) queueMessageToPublish(messageToPublish messageToPublish) {
 	timeoutTimer := time.NewTimer(5 * time.Second)
 	defer timeoutTimer.Stop()

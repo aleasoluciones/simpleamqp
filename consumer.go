@@ -7,13 +7,13 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// AMQPConsumer is the interface that represents an AMQP consumer that has Receive and ReceiveWithoutTimeout functions
+// AMQPConsumer represents an AMQP consumer. Used to receive messages with or without timeout
 type AMQPConsumer interface {
 	Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage
 	ReceiveWithoutTimeout(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) chan AmqpMessage
 }
 
-// AmqpConsumer is a type to hold the brokerURI
+// AmqpConsumer holds the brokerURI
 type AmqpConsumer struct {
 	brokerURI string
 }

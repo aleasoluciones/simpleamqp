@@ -12,14 +12,16 @@ const (
 	timeToReconnect = 5 * time.Second
 )
 
-// QueueOptions holds the options when declaring a queue
+// QueueOptions holds the flags when declaring a queue:
+// durable, delete, exclusive
 type QueueOptions struct {
 	Durable   bool
 	Delete    bool
 	Exclusive bool
 }
 
-// DefaultQueueOptions define the default options that queues will have if not overriden
+// DefaultQueueOptions define the default options when creating queues:
+// durable, not autodelete and not exclusive
 var DefaultQueueOptions = QueueOptions{
 	Durable:   true,
 	Delete:    false,
