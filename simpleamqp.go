@@ -32,57 +32,43 @@ func normalizeURL(url string) string {
 	return strings.Replace(url, "rabbitmq://", "amqp://", -1)
 }
 
-func setup(url string) (*amqp.Connection, *amqp.Channel) {
-	for {
-		conn, err := amqp.Dial(normalizeURL(url))
-		if err != nil {
-			log.Println("Error dial", err)
-			time.Sleep(timeToReconnect)
-			continue
-		}
-
-		ch, err := conn.Channel()
-		if err != nil {
-			log.Println("Error channel", err)
-			conn.Close()
-			time.Sleep(timeToReconnect)
-			continue
-		}
-		return conn, ch
+func setup(url string) (*amqp.Connection, *amqp.Channel, error) {
+	conn, err := amqp.Dial(normalizeURL(url))
+	if err != nil {
+		log.Println("Error dial", err)
+		return nil, nil, err
 	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Println("Error channel", err)
+		conn.Close()
+		return nil, nil, err
+	}
+	return conn, ch, nil
 }
 
-func exchangeDeclare(ch *amqp.Channel, exchange string) {
-	for {
-		log.Println("Exchange declare", exchange)
-		err := ch.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
-		if err != nil {
-			log.Println("Error declaring exchange", err)
-			time.Sleep(timeToReconnect)
-			continue
-		} else {
-			return
-		}
+func exchangeDeclare(ch *amqp.Channel, exchange string) error {
+	log.Println("Exchange declare", exchange)
+	err := ch.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
+	if err != nil {
+		log.Println("Error declaring exchange", err)
 	}
+	return err
 }
 
-func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) amqp.Queue {
-	for {
-		log.Println("Queue declare", queue)
-		q, err := ch.QueueDeclare(
-			queue, // name of the queue
-			queueOptions.Durable,
-			queueOptions.Delete,
-			queueOptions.Exclusive,
-			false, // noWait
-			nil,   // arguments
-		)
-		if err != nil {
-			log.Println("Error declaring queue", err)
-			time.Sleep(timeToReconnect)
-			continue
-		} else {
-			return q
-		}
+func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) (amqp.Queue, error) {
+	log.Println("Queue declare", queue)
+	q, err := ch.QueueDeclare(
+		queue, // name of the queue
+		queueOptions.Durable,
+		queueOptions.Delete,
+		queueOptions.Exclusive,
+		false, // noWait
+		nil,   // arguments
+	)
+	if err != nil {
+		log.Println("Error declaring queue", err)
 	}
+	return q, err
 }

@@ -38,10 +38,15 @@ type AmqpMessage struct {
 func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage {
 	output := make(chan AmqpMessage)
 
-	conn, ch, qname := client.setupConsuming(exchange, routingKeys, queue, queueOptions)
-
 	go func() {
 		for {
+			conn, ch, qname, err := client.setupConsuming(exchange, routingKeys, queue, queueOptions)
+			if err != nil {
+				log.Println("[simpleamqp] Error doing setupConsuming -> ", err)
+				log.Println("[simpleamqp] Waiting before reconnect")
+				time.Sleep(timeToReconnect)
+				continue
+			}
 			messages, err := ch.Consume(qname, "", true, false, false, false, nil)
 			if err != nil {
 				log.Println("[simpleamqp] Error consuming messages -> ", err)
@@ -57,8 +62,6 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 
 			log.Println("[simpleamqp] Waiting before reconnect")
 			time.Sleep(timeToReconnect)
-
-			conn, ch, qname = client.setupConsuming(exchange, routingKeys, queue, queueOptions)
 		}
 	}()
 
@@ -70,17 +73,30 @@ func (client *AmqpConsumer) ReceiveWithoutTimeout(exchange string, routingKeys [
 	return client.Receive(exchange, routingKeys, queue, queueOptions, 0*time.Second)
 }
 
-func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) (*amqp.Connection, *amqp.Channel, string) {
-	conn, ch := setup(client.brokerURI)
+func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string, queue string, queueOptions QueueOptions) (*amqp.Connection, *amqp.Channel, string, error) {
+	conn, ch, err := setup(client.brokerURI)
+	if err != nil {
+		return nil, nil, "", err
+	}
 
-	exchangeDeclare(ch, exchange)
+	err = exchangeDeclare(ch, exchange)
+	if err != nil {
+		return nil, nil, "", err
+	}
 
-	q := queueDeclare(ch, queue, queueOptions)
+	q, err := queueDeclare(ch, queue, queueOptions)
+	if err != nil {
+		return nil, nil, "", err
+	}
 
 	for _, routingKey := range routingKeys {
-		ch.QueueBind(q.Name, routingKey, exchange, false, nil)
+		err = ch.QueueBind(q.Name, routingKey, exchange, false, nil)
+		if err != nil {
+			log.Println("[simpleamqp] Error binding queue with the exchange")
+			return nil, nil, "", err
+		}
 	}
-	return conn, ch, q.Name
+	return conn, ch, q.Name, nil
 }
 
 func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queueTimeout time.Duration) (closed bool) {

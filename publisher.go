@@ -8,6 +8,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const (
+	timeToWaitForChannel = 5 * time.Second // seconds to wait and don't block when writting to channel publisher.outputMessages
+)
+
 type messageToPublish struct {
 	routingKey string
 	message    []byte
@@ -38,8 +42,7 @@ func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 	go func() {
 		for {
 			err := publisher.publishLoop()
-			log.Println("Error", err)
-			log.Println("Waiting", timeToReconnect, "to reconnect")
+			log.Println("Waiting", timeToReconnect, "to reconnect due ", err)
 			time.Sleep(timeToReconnect)
 		}
 	}()
@@ -60,7 +63,7 @@ func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte
 // The message will be published to the AmqpPublisher exchange using the given routingKey
 // If the message can't be queued after some short time (because the channel is full) a log is printed and the message is discarded
 func (publisher *AmqpPublisher) queueMessageToPublish(messageToPublish messageToPublish) {
-	timeoutTimer := time.NewTimer(5 * time.Second)
+	timeoutTimer := time.NewTimer(timeToWaitForChannel)
 	defer timeoutTimer.Stop()
 	afterTimeout := timeoutTimer.C
 
@@ -91,11 +94,17 @@ func (publisher *AmqpPublisher) publish(channel *amqp.Channel, messageToPublish 
 }
 
 func (publisher *AmqpPublisher) publishLoop() error {
-	conn, ch := setup(publisher.brokerURI)
+	conn, ch, err := setup(publisher.brokerURI)
+	if err != nil {
+		return err
+	}
 	defer conn.Close()
 	defer ch.Close()
 
-	exchangeDeclare(ch, publisher.exchange)
+	err = exchangeDeclare(ch, publisher.exchange)
+	if err != nil {
+		return err
+	}
 	for {
 		messageToPublish := <-publisher.outputMessages
 		err := publisher.publish(ch, messageToPublish)
