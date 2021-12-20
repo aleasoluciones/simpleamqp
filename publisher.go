@@ -42,7 +42,7 @@ func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 	go func() {
 		for {
 			err := publisher.publishLoop()
-			log.Println("Waiting", timeToReconnect, "to reconnect due ", err)
+			log.Println("[simpleamqp] Waiting", timeToReconnect, "to reconnect due ", err)
 			time.Sleep(timeToReconnect)
 		}
 	}()
@@ -70,7 +70,7 @@ func (publisher *AmqpPublisher) queueMessageToPublish(messageToPublish messageTo
 	select {
 	case publisher.outputMessages <- messageToPublish:
 	case <-afterTimeout:
-		log.Println("Publish channel full", messageToPublish)
+		log.Println("[simpleamqp] Publish channel full", messageToPublish)
 	}
 }
 
@@ -111,6 +111,6 @@ func (publisher *AmqpPublisher) publishLoop() error {
 		if err != nil {
 			return err
 		}
-		log.Println("Published", messageToPublish.routingKey, string(messageToPublish.message))
+		log.Println("[simpleamqp] Published", messageToPublish.routingKey, string(messageToPublish.message))
 	}
 }

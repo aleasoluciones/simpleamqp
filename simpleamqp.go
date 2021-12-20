@@ -35,13 +35,13 @@ func normalizeURL(url string) string {
 func setup(url string) (*amqp.Connection, *amqp.Channel, error) {
 	conn, err := amqp.Dial(normalizeURL(url))
 	if err != nil {
-		log.Println("Error dial", err)
+		log.Println("[simpleamqp] Error dial", err)
 		return nil, nil, err
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Println("Error channel", err)
+		log.Println("[simpleamqp] Error channel", err)
 		conn.Close()
 		return nil, nil, err
 	}
@@ -49,16 +49,16 @@ func setup(url string) (*amqp.Connection, *amqp.Channel, error) {
 }
 
 func exchangeDeclare(ch *amqp.Channel, exchange string) error {
-	log.Println("Exchange declare", exchange)
+	log.Println("[simpleamqp] Exchange declare", exchange)
 	err := ch.ExchangeDeclare(exchange, "topic", true, false, false, false, nil)
 	if err != nil {
-		log.Println("Error declaring exchange", err)
+		log.Println("[simpleamqp] Error declaring exchange", err)
 	}
 	return err
 }
 
 func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) (amqp.Queue, error) {
-	log.Println("Queue declare", queue)
+	log.Println("[simpleamqp] Queue declare", queue)
 	q, err := ch.QueueDeclare(
 		queue, // name of the queue
 		queueOptions.Durable,
@@ -68,7 +68,7 @@ func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) (am
 		nil,   // arguments
 	)
 	if err != nil {
-		log.Println("Error declaring queue", err)
+		log.Println("[simpleamqp] rror declaring queue", err)
 	}
 	return q, err
 }
