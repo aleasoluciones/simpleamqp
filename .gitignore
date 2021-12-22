@@ -31,3 +31,10 @@ _testmain.go
 
 # Exclude vendor directory (godep dependency manager tool)
 vendor
+
+# CTags
+tags
+
+# Compiled binaries
+consumer
+publisher
