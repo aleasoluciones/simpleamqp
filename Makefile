@@ -1,39 +1,26 @@
 all: clean test build
 
-jenkins: install_dep_tool install_go_linter production_restore_deps clean test build
+jenkins: clean test build
 
-install_dep_tool:
-	go get github.com/tools/godep
+update_dep:
+	go get $(DEP)
+	go mod tidy
 
-install_go_linter:
-	go get -u -v golang.org/x/lint/golint
-
-initialize_deps:
-	go get -d -v ./...
-	go get -d -v github.com/stretchr/testify/assert
-	go get -v golang.org/x/lint/golint
-	godep save
-
-update_deps:
-	godep go install -v ./...
-	godep go install -v github.com/stretchr/testify/assert
-	godep go install -v golang.org/x/lint/golint
-	godep update ./...
+update_all_deps:
+	go get -u
+	go mod tidy
 
 test:
-	golint ./...
-	godep go vet ./...
-	godep go test -timeout 30s -tags integration ./...
+	go vet ./...
+	go test -tags integration ./...
 
 build:
-	godep go build -a -installsuffix cgo examples/consumer/consumer.go
-	godep go build -a -installsuffix cgo examples/publisher/publisher.go
+	go build -a -installsuffix cgo examples/consumer/consumer.go
+	go build -a -installsuffix cgo examples/publisher/publisher.go
 
 clean:
 	rm -rf consumer
 	rm -rf publisher
 
-production_restore_deps:
-	godep restore
 
-.PHONY: all jenkins deps install_dep_tool install_go_linter initialize_deps update_deps test build clean production_restore_deps
+.PHONY: all jenkins update_dep update_all_deps test build clean
