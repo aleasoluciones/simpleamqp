@@ -68,7 +68,7 @@ func queueDeclare(ch *amqp.Channel, queue string, queueOptions QueueOptions) (am
 		nil,   // arguments
 	)
 	if err != nil {
-		log.Println("[simpleamqp] rror declaring queue", err)
+		log.Println("[simpleamqp] Error declaring queue", err)
 	}
 	return q, err
 }
