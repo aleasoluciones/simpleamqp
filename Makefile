@@ -1,6 +1,6 @@
 all: clean test build
 
-jenkins: clean test build
+travis: clean test build
 
 update_dep:
 	go get $(DEP)
@@ -12,6 +12,7 @@ update_all_deps:
 
 test:
 	go vet ./...
+	go clean -testcache
 	go test -tags integration ./...
 
 build:
@@ -19,8 +20,8 @@ build:
 	go build -a -installsuffix cgo examples/publisher/publisher.go
 
 clean:
-	rm -rf consumer
-	rm -rf publisher
+	rm -f consumer
+	rm -f publisher
 
 
-.PHONY: all jenkins update_dep update_all_deps test build clean
+.PHONY: all travis update_dep update_all_deps test build clean

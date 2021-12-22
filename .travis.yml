@@ -1,28 +1,30 @@
-language: go
-go:
- - 1.17.x
+os: linux
 
-sudo: false
+dist: focal
+
+language: go
+
+go:
+  - 1.17.x
 
 services:
   - rabbitmq
 
-# safelist branch to build
-branches:
-  only:
-      - master
-
 addons:
   apt:
     packages:
-    - rabbitmq-server
+      - rabbitmq-server
+
+branches:
+  only:
+    - master
 
 env:
- - AMQP_URL=amqp://guest:guest@127.0.0.1:5672/
+  - AMQP_URL=amqp://guest:guest@127.0.0.1:5672/
 
 script:
-  - make jenkins
+  - make travis
 
 notifications:
   email:
-  - bifer@alea-soluciones.com
+    - bifer@alea-soluciones.com
