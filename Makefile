@@ -1,7 +1,5 @@
 all: clean test build
 
-travis: clean test build
-
 update_dep:
 	go get $(DEP)
 	go mod tidy
@@ -13,15 +11,24 @@ update_all_deps:
 test:
 	go vet ./...
 	go clean -testcache
-	go test -tags integration ./...
+	go test -v -tags integration ./... -timeout 60s
 
 build:
-	go build -a -installsuffix cgo examples/consumer/consumer.go
-	go build -a -installsuffix cgo examples/publisher/publisher.go
+	go build examples/consumer/consumer.go
+	go build examples/publisher/publisher.go
 
 clean:
 	rm -f consumer
 	rm -f publisher
 
+start_dependencies:
+	docker-compose -f dev/simpleamqp_devdocker/docker-compose.yml up -d
 
-.PHONY: all travis update_dep update_all_deps test build clean
+stop_dependencies:
+	docker-compose -f dev/simpleamqp_devdocker/docker-compose.yml stop
+
+rm_dependencies:
+	docker-compose -f dev/simpleamqp_devdocker/docker-compose.yml down -v
+
+
+.PHONY: all update_dep update_all_deps test build clean start_dependencies stop_dependencies rm_dependencies
