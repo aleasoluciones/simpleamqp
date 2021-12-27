@@ -3,28 +3,33 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/aleasoluciones/simpleamqp"
 )
 
 func main() {
-	var amqpuri string
+	var brokerURI string
+	brokerURIParam := "brokeruri"
+	brokerURIEnv := "BROKER_URI"
 
-	flag.StringVar(&amqpuri, "amqpuri", "amqp://guest:guest@localhost/", "AMQP connection uri")
+	flag.StringVar(&brokerURI, brokerURIParam, os.Getenv(brokerURIEnv), "Broker URI")
 	flag.Parse()
 
-	amqpPublisher := simpleamqp.NewAmqpPublisher(amqpuri, "events")
+	if len(brokerURI) == 0 {
+		msg := fmt.Sprintf("Please specify a broker URI with the parameter -%s or set the %s environment variable.", brokerURIParam, brokerURIEnv)
+		fmt.Println(msg)
+		return
+	}
+
+	amqpPublisher := simpleamqp.NewAmqpPublisher(brokerURI, "events")
 	cont := 0
 	for {
-
-		messageBody := fmt.Sprint("EFA1 ", cont)
-		log.Println(messageBody)
-		amqpPublisher.Publish("efa1", []byte(messageBody))
-		messageBody = fmt.Sprint("EFA2 ", cont)
-		amqpPublisher.Publish("efa2", []byte(messageBody))
+		payload := fmt.Sprintf("Message #%d", cont)
+		amqpPublisher.Publish("routing_key_1", []byte(payload))
+		amqpPublisher.Publish("routing_key_2", []byte(payload))
 
 		time.Sleep(time.Duration(rand.Intn(2000)) * time.Millisecond)
 		cont = cont + 1

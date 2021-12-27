@@ -12,11 +12,11 @@ import (
 )
 
 func amqpURLFromEnv() string {
-	url := os.Getenv("AMQP_URL")
-	if url == "" {
-		url = "amqp://"
+	brokerURI := os.Getenv("BROKER_URI")
+	if len(brokerURI) == 0 {
+		brokerURI = "amqp://guest:guest@localhost/"
 	}
-	return url
+	return brokerURI
 }
 
 func TestPublishAndReceiveTwoMessages(t *testing.T) {
@@ -24,9 +24,12 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	amqpPublisher := NewAmqpPublisher(amqpURL, "events")
 	amqpConsumer := NewAmqpConsumer(amqpURL)
 	messages := amqpConsumer.Receive(
-		"events", []string{"routingkey1"},
-		"", QueueOptions{Durable: false, Delete: true, Exclusive: true},
-		30*time.Second)
+		"events",
+		[]string{"routingkey1"},
+		"",
+		QueueOptions{Durable: false, Delete: true, Exclusive: true},
+		30*time.Second,
+	)
 
 	// Sleep sometime so the consumer can create the queue and bind.
 	// Then why in the TTL test this sleep is not needed? Because
@@ -73,9 +76,12 @@ func TestPublishWithTTL(t *testing.T) {
 
 	amqpConsumer := NewAmqpConsumer(amqpURL)
 	messages := amqpConsumer.Receive(
-		exchange, []string{"routingkey2"},
-		queueName, queueOptions,
-		30*time.Second)
+		exchange,
+		[]string{"routingkey2"},
+		queueName,
+		queueOptions,
+		30*time.Second,
+	)
 
 	select {
 	case <-messages:
