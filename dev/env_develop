@@ -1,0 +1,7 @@
+echo "DEVELOP enviroment"
+
+export BROKER_USER=guest
+export BROKER_PASSWORD=guest
+export BROKER_PORT=5665
+export BROKER_MANAGEMENT_PORT=15665
+export BROKER_URI=amqp://${BROKER_USER}:${BROKER_PASSWORD}@localhost:${BROKER_PORT}/
