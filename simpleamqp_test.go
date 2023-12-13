@@ -3,6 +3,8 @@
 package simpleamqp
 
 import (
+	"bytes"
+	"compress/gzip"
 	"os"
 	"time"
 
@@ -30,6 +32,7 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 		QueueOptions{Durable: false, Delete: true, Exclusive: true},
 		30*time.Second,
 	)
+	irrelevantBody2Compressed, _ := compressWithGzip([]byte("irrelevantBody2"))
 
 	// Sleep sometime so the consumer can create the queue and bind.
 	// Then why in the TTL test this sleep is not needed? Because
@@ -37,19 +40,16 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	time.Sleep(7 * time.Second)
 
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
-	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"), map[string]interface{}{"compress": true})
+	amqpPublisher.Publish("routingkey1", irrelevantBody2Compressed, map[string]interface{}{"compress": true})
 
 	message1 := <-messages
 	assert.Equal(t, message1.Body, "irrelevantBody1")
 	assert.Equal(t, message1.Exchange, "events")
 	assert.Equal(t, message1.RoutingKey, "routingkey1")
-	assert.Equal(t, message1.Headers, map[string]interface{}(nil))
 	message2 := <-messages
 	assert.Equal(t, message2.Body, "irrelevantBody2")
 	assert.Equal(t, message2.Exchange, "events")
 	assert.Equal(t, message2.RoutingKey, "routingkey1")
-	assert.Equal(t, message2.Headers, map[string]interface{}{"compress": true})
-
 }
 
 func TestPublishWithTTL(t *testing.T) {
@@ -90,4 +90,21 @@ func TestPublishWithTTL(t *testing.T) {
 		t.Error("Should not receive any message")
 	case <-time.After(500 * time.Millisecond):
 	}
+}
+
+func compressWithGzip(input []byte) ([]byte, error) {
+	var compressedBuffer bytes.Buffer
+	writer := gzip.NewWriter(&compressedBuffer)
+
+	_, err := writer.Write(input)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return compressedBuffer.Bytes(), nil
 }
