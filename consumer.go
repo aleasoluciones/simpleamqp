@@ -137,7 +137,8 @@ func decompress(body []byte, headers map[string]interface{}) []byte {
 	if headers[COMPRESS_HEADER] == true {
 		gzipReader, err := gzip.NewReader(bytes.NewReader(body))
 		if err != nil {
-			log.Println("[simpleamqp] Error decompressing message")
+			log.Println("[simpleamqp] Error decompressing message, returning original body")
+			return body
 		}
 		decompressedBody, _ := io.ReadAll(gzipReader)
 		return decompressedBody
