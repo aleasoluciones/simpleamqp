@@ -10,10 +10,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-const (
-	COMPRESS_HEADER = "compress"
-)
-
 // AMQPConsumer represents an AMQP consumer. Used to receive messages with or without timeout
 type AMQPConsumer interface {
 	Receive(exchange string, routingKeys []string, queue string, queueOptions QueueOptions, queueTimeout time.Duration) chan AmqpMessage

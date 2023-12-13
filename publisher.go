@@ -1,6 +1,8 @@
 package simpleamqp
 
 import (
+	"bytes"
+	"compress/gzip"
 	"log"
 	"strconv"
 	"time"
@@ -10,6 +12,7 @@ import (
 
 const (
 	timeToWaitForChannel = 5 * time.Second // seconds to wait and don't block when writting to channel publisher.outputMessages
+	COMPRESS_HEADER      = "compress"
 )
 
 type messageToPublish struct {
@@ -53,7 +56,11 @@ func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 // Publish publish a message using the given routing key
 func (publisher *AmqpPublisher) Publish(routingKey string, message []byte, headers ...map[string]interface{}) {
 	if len(headers) > 0 {
-		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, headers: headers[0]})
+		compressedMessage, err := compress(message, headers[0])
+		if err != nil {
+			log.Println("[simpleamqp] Error compressing message", err)
+		}
+		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: compressedMessage, headers: headers[0]})
 	} else {
 		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message})
 	}
@@ -62,7 +69,11 @@ func (publisher *AmqpPublisher) Publish(routingKey string, message []byte, heade
 // PublishWithTTL publish a message waiting the given TTL
 func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte, ttl int, headers ...map[string]interface{}) {
 	if len(headers) > 0 {
-		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, expiration: strconv.Itoa(ttl), headers: headers[0]})
+		compressedMessage, err := compress(message, headers[0])
+		if err != nil {
+			log.Println("[simpleamqp] Error compressing message", err)
+		}
+		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: compressedMessage, expiration: strconv.Itoa(ttl), headers: headers[0]})
 	} else {
 		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, expiration: strconv.Itoa(ttl)})
 	}
@@ -122,4 +133,25 @@ func (publisher *AmqpPublisher) publishLoop() error {
 		}
 		log.Println("[simpleamqp] Published", messageToPublish.routingKey, string(messageToPublish.message))
 	}
+}
+
+func compress(input []byte, headers map[string]interface{}) ([]byte, error) {
+	if headers[COMPRESS_HEADER] == true {
+		var compressedBuffer bytes.Buffer
+		writer := gzip.NewWriter(&compressedBuffer)
+
+		_, err := writer.Write(input)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		return compressedBuffer.Bytes(), nil
+	}
+	return input, nil
+
 }

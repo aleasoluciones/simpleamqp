@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/github/license/aleasoluciones/http2amqp)](https://github.com/aleasoluciones/http2amqp/blob/master/LICENSE)
 
 **simpleamqp** is a very opinionated minimal wrapper around the [AMQP](github.com/streadway/amqp) Go library with the following features:
-- Publish events to a exchange 
+- Publish events to a exchange
 - Consume events from a exchange
 - Try to be always running
 - Best effort when sending or receiving the message
@@ -69,6 +69,7 @@ Now you should see how an event is sent periodically by the publisher, and read 
  * Reconnect when a message can't be delivered
  * Message buffer to avoid blocking the publisher
  * Discard messages when the message buffer is full due to a connection problem
+ * Compress messages based on "compress" header (gzip)
 
 #### Known Issues
 
@@ -86,6 +87,7 @@ Now you should see how an event is sent periodically by the publisher, and read 
  * main option for the queue configurables
  * Reconnect in case of connection error
  * Reconnect when no messages received in a configurable amount of time (to detect some kind of connection problems at NATED networks where the NATED connection expires)
+ * Decompress messages based on "compress" header (gzip)
 
 #### Known Issues
  * When there is a connection problem, some messages can be lost
