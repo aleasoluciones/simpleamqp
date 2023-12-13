@@ -30,6 +30,7 @@ type AmqpMessage struct {
 	Exchange   string
 	RoutingKey string
 	Body       string
+	Headers    map[string]interface{}
 }
 
 // Receive Return a AmqpMessage channel to receive messages using a given queue connected to the exchange with one ore more routing keys
@@ -104,7 +105,7 @@ func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queu
 	if queueTimeout == 0*time.Second {
 		message, more := <-messages
 		if more {
-			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body)}
+			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body), Headers: message.Headers}
 			return false
 		}
 		log.Println("[simpleamqp] No more messages... closing channel to reconnect with timeout zero")
@@ -118,7 +119,7 @@ func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queu
 	select {
 	case message, more := <-messages:
 		if more {
-			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body)}
+			output <- AmqpMessage{Exchange: message.Exchange, RoutingKey: message.RoutingKey, Body: string(message.Body), Headers: message.Headers}
 			return false
 		}
 		log.Println("[simpleamqp] No more messages... closing channel to reconnect")

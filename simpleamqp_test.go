@@ -37,16 +37,18 @@ func TestPublishAndReceiveTwoMessages(t *testing.T) {
 	time.Sleep(7 * time.Second)
 
 	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody1"))
-	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"))
+	amqpPublisher.Publish("routingkey1", []byte("irrelevantBody2"), map[string]interface{}{"compress": true})
 
 	message1 := <-messages
 	assert.Equal(t, message1.Body, "irrelevantBody1")
 	assert.Equal(t, message1.Exchange, "events")
 	assert.Equal(t, message1.RoutingKey, "routingkey1")
+	assert.Equal(t, message1.Headers, map[string]interface{}(nil))
 	message2 := <-messages
 	assert.Equal(t, message2.Body, "irrelevantBody2")
 	assert.Equal(t, message2.Exchange, "events")
 	assert.Equal(t, message2.RoutingKey, "routingkey1")
+	assert.Equal(t, message2.Headers, map[string]interface{}{"compress": true})
 
 }
 

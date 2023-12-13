@@ -16,12 +16,13 @@ type messageToPublish struct {
 	routingKey string
 	message    []byte
 	expiration string
+	headers    map[string]interface{}
 }
 
 // AMQPPublisher represents an AMQP Publisher that can publish messages with or without TTL
 type AMQPPublisher interface {
-	Publish(string, []byte)
-	PublishWithTTL(string, []byte, int)
+	Publish(string, []byte, ...map[string]interface{})
+	PublishWithTTL(string, []byte, int, ...map[string]interface{})
 }
 
 // AmqpPublisher holds the brokerURI, exchange name and channel where to submit messages to be publish to rabbitmq
@@ -50,13 +51,21 @@ func NewAmqpPublisher(brokerURI, exchange string) *AmqpPublisher {
 }
 
 // Publish publish a message using the given routing key
-func (publisher *AmqpPublisher) Publish(routingKey string, message []byte) {
-	publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message})
+func (publisher *AmqpPublisher) Publish(routingKey string, message []byte, headers ...map[string]interface{}) {
+	if len(headers) > 0 {
+		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, headers: headers[0]})
+	} else {
+		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message})
+	}
 }
 
 // PublishWithTTL publish a message waiting the given TTL
-func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte, ttl int) {
-	publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, expiration: strconv.Itoa(ttl)})
+func (publisher *AmqpPublisher) PublishWithTTL(routingKey string, message []byte, ttl int, headers ...map[string]interface{}) {
+	if len(headers) > 0 {
+		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, expiration: strconv.Itoa(ttl), headers: headers[0]})
+	} else {
+		publisher.queueMessageToPublish(messageToPublish{routingKey: routingKey, message: message, expiration: strconv.Itoa(ttl)})
+	}
 }
 
 // Queue the message to be published and return inmediatly
@@ -81,7 +90,7 @@ func (publisher *AmqpPublisher) publish(channel *amqp.Channel, messageToPublish 
 		false,
 		false,
 		amqp.Publishing{
-			Headers:         amqp.Table{},
+			Headers:         messageToPublish.headers,
 			ContentType:     "application/json",
 			ContentEncoding: "",
 			Body:            messageToPublish.message,
