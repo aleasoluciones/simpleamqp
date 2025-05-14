@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 // AMQPConsumer represents an AMQP consumer. Used to receive messages with or without timeout
