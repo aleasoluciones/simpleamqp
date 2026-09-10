@@ -53,6 +53,11 @@ func (client *AmqpConsumer) Receive(exchange string, routingKeys []string, queue
 			messages, err := ch.Consume(qname, "", true, false, false, false, nil)
 			if err != nil {
 				log.Println("[simpleamqp] Error consuming messages -> ", err)
+				ch.Close()
+				conn.Close()
+				log.Println("[simpleamqp] Waiting before reconnect")
+				time.Sleep(timeToReconnect)
+				continue
 			}
 
 			for closed := false; closed != true; {
@@ -103,6 +108,11 @@ func (client *AmqpConsumer) setupConsuming(exchange string, routingKeys []string
 }
 
 func messageToOuput(messages <-chan amqp.Delivery, output chan AmqpMessage, queueTimeout time.Duration) (closed bool) {
+
+	if messages == nil {
+		log.Println("[simpleamqp] Nil messages channel... closing channel to reconnect")
+		return true
+	}
 
 	if queueTimeout == 0*time.Second {
 		message, more := <-messages
